@@ -1,35 +1,26 @@
 import streamlit as st
 import pickle
 import string
-from nltk.corpus import stopwords
-import nltk
-
-# Download the Punkt tokenizer models
-nltk.download('punkt')
-
 import os
-
-# .....................
-# Define local directory to store NLTK data
-nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
-os.makedirs(nltk_data_path, exist_ok=True)
-
-# Add this directory to NLTK data path
-nltk.data.path.append(nltk_data_path)
-
-# Ensure 'punkt' is available
-try:
-    nltk.data.find("tokenizers/punkt")
-except LookupError:
-    nltk.download("punkt", download_dir=nltk_data_path)
-# ......................
-
-
-
-nltk.download('punkt') 
-
+import nltk
+from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
+# Ensure necessary NLTK datasets are downloaded
+nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
+os.makedirs(nltk_data_path, exist_ok=True)
+nltk.data.path.append(nltk_data_path)
+
+# Download required NLTK resources if not available
+for resource in ["punkt", "stopwords"]:
+    try:
+        nltk.data.find(f"corpora/{resource}")
+    except LookupError:
+        nltk.download(resource, download_dir=nltk_data_path)
+        
+
+
+from nltk.stem.porter import PorterStemmer
 ps = PorterStemmer()
 
 
