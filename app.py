@@ -6,56 +6,53 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
-# Download required datasets
+# Download required datasets (remove incorrect one)
 nltk.download('punkt')
-nltk.download('punkt_tab')
 nltk.download('stopwords')
 
-from nltk.stem.porter import PorterStemmer
+# Initialize stemmer and stopwords set
 ps = PorterStemmer()
+stop_words = set(stopwords.words('english'))  # Store stopwords in a set for faster lookup
 
-
+# Function to preprocess text
 def transform_text(text):
     text = text.lower()
-    text = nltk.word_tokenize(text)
+    text = word_tokenize(text)  # Use the correct tokenizer
 
-    y = []
-    for i in text:
-        if i.isalnum():
-            y.append(i)
+    # Remove non-alphanumeric characters
+    text = [i for i in text if i.isalnum()]
 
-    text = y[:]
-    y.clear()
+    # Remove stopwords and punctuation
+    text = [i for i in text if i not in stop_words and i not in string.punctuation]
 
-    for i in text:
-        if i not in stopwords.words('english') and i not in string.punctuation:
-            y.append(i)
+    # Apply stemming
+    text = [ps.stem(i) for i in text]
 
-    text = y[:]
-    y.clear()
+    return " ".join(text)
 
-    for i in text:
-        y.append(ps.stem(i))
+# Load the vectorizer and model with error handling
+try:
+    tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
+    model = pickle.load(open('model.pkl', 'rb'))
+except FileNotFoundError:
+    st.error("Model or vectorizer file not found. Ensure 'vectorizer.pkl' and 'model.pkl' exist.")
+    st.stop()
+except Exception as e:
+    st.error(f"Error loading model: {e}")
+    st.stop()
 
-    return " ".join(y)
-
-tfidf = pickle.load(open('vectorizer.pkl','rb'))
-model = pickle.load(open('model.pkl','rb'))
-
+# Streamlit UI
 st.title("Email/SMS Spam Classifier")
 
 input_sms = st.text_area("Enter the message")
 
 if st.button('Predict'):
+    if input_sms.strip():  # Ensure input is not empty
+        transformed_sms = transform_text(input_sms)
+        vector_input = tfidf.transform([transformed_sms])  # Vectorize input
+        result = model.predict(vector_input)[0]  # Predict
 
-    # 1. preprocess
-    transformed_sms = transform_text(input_sms)
-    # 2. vectorize
-    vector_input = tfidf.transform([transformed_sms])
-    # 3. predict
-    result = model.predict(vector_input)[0]
-    # 4. Display
-    if result == 1:
-        st.header("Spam")
+        # Display result
+        st.header("Spam" if result == 1 else "Not Spam")
     else:
-        st.header("Not Spam")
+        st.warning("Please enter a message before predicting.")
