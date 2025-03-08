@@ -1,26 +1,10 @@
 import streamlit as st
 import pickle
 import string
-import os
-import nltk
 from nltk.corpus import stopwords
+import nltk
 from nltk.stem.porter import PorterStemmer
 
-# Ensure necessary NLTK datasets are downloaded
-nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
-os.makedirs(nltk_data_path, exist_ok=True)
-nltk.data.path.append(nltk_data_path)
-
-# Download required NLTK resources if not available
-for resource in ["punkt", "stopwords"]:
-    try:
-        nltk.data.find(f"corpora/{resource}")
-    except LookupError:
-        nltk.download(resource, download_dir=nltk_data_path)
-        
-
-
-from nltk.stem.porter import PorterStemmer
 ps = PorterStemmer()
 
 
