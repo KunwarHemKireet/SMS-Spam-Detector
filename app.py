@@ -3,7 +3,10 @@ import pickle
 import string
 from nltk.corpus import stopwords
 import nltk
-import nltk
+
+# Download the Punkt tokenizer models
+nltk.download('punkt')
+
 import os
 
 # .....................
